@@ -14,8 +14,7 @@
   "author": "Derrick Reimer",
   "files": [
     "dist/**/*.{js,ts}",
-    "forms.d.ts",
-    "functions.d.ts"
+    "forms.d.ts"
   ],
   "main": "dist/formspree.cjs.js",
   "module": "dist/formspree.esm.js",
