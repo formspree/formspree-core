@@ -26,7 +26,7 @@ it('resolves with body and response when successful', () => {
     expect(props.method).toEqual('POST');
     expect(props.mode).toEqual('cors');
     expect(url).toEqual(
-      'https://api.statickit.com/j/sites/111/forms/newsletter/submissions'
+      'https://formspree-react.herokuapp.com/p/111/f/newsletter'
     );
     return success;
   };

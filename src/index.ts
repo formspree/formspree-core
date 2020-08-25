@@ -14,7 +14,7 @@ export interface Config {
   site: string;
 }
 
-export class StaticKit {
+export class Client {
   site: string;
   private session: Session | undefined;
 
@@ -51,9 +51,9 @@ export class StaticKit {
     data: SubmissionData,
     opts: SubmissionOptions = {}
   ): Promise<SubmissionResponse> {
-    let endpoint = opts.endpoint || 'https://api.statickit.com';
+    let endpoint = opts.endpoint || 'https://formspree-react.herokuapp.com';
     let fetchImpl = opts.fetchImpl || fetchPonyfill({ Promise }).fetch;
-    let url = `${endpoint}/j/sites/${this.site}/forms/${key}/submissions`;
+    let url = `${endpoint}/p/${this.site}/f/${key}`;
 
     const serializeBody = (data: SubmissionData): FormData | string => {
       if (data instanceof FormData) return data;
@@ -65,7 +65,7 @@ export class StaticKit {
     }
 
     let headers: { [key: string]: string } = {
-      'StaticKit-Client': clientHeader(opts.clientName)
+      'Formspree-Client': clientHeader(opts.clientName)
     };
 
     if (!(data instanceof FormData)) {
@@ -105,7 +105,7 @@ export class StaticKit {
     let url = `${endpoint}/j/sites/${this.site}/functions/${name}/invoke`;
 
     let headers: { [key: string]: string } = {
-      'StaticKit-Client': clientHeader(opts.clientName),
+      'Formspree-Client': clientHeader(opts.clientName),
       'Content-Type': 'application/json'
     };
 
@@ -131,6 +131,6 @@ export class StaticKit {
 /**
  * Constructs the client object.
  */
-export const createClient = (config: Config): StaticKit => {
-  return new StaticKit(config);
+export const createClient = (config: Config): Client => {
+  return new Client(config);
 };
