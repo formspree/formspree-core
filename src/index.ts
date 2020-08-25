@@ -10,15 +10,15 @@ import { clientHeader, encode64, append } from './utils';
 import { Session } from './session';
 
 export interface Config {
-  site: string;
+  projectKey: string;
 }
 
 export class Client {
-  site: string;
+  projectKey: string;
   private session: Session | undefined;
 
   constructor(config: Config) {
-    this.site = config.site;
+    this.projectKey = config.projectKey;
     if (typeof window !== 'undefined') this.startBrowserSession();
   }
 
@@ -41,18 +41,18 @@ export class Client {
   /**
    * Submit a form.
    *
-   * @param key - The form key.
+   * @param formKey - The form key.
    * @param data - An object or FormData instance containing submission data.
    * @param args - An object of form submission data.
    */
   submitForm(
-    key: string,
+    formKey: string,
     data: SubmissionData,
     opts: SubmissionOptions = {}
   ): Promise<SubmissionResponse> {
     let endpoint = opts.endpoint || 'https://formspree-react.herokuapp.com';
     let fetchImpl = opts.fetchImpl || fetchPonyfill({ Promise }).fetch;
-    let url = `${endpoint}/p/${this.site}/f/${key}`;
+    let url = `${endpoint}/p/${this.projectKey}/f/${formKey}`;
 
     const serializeBody = (data: SubmissionData): FormData | string => {
       if (data instanceof FormData) return data;
