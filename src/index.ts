@@ -63,9 +63,12 @@ export class Client {
       append(data, '_t', encode64(this.session.data()));
     }
 
-    let headers: { [key: string]: string } = {
-      'Formspree-Client': clientHeader(opts.clientName)
-    };
+    // For now, drop the `Formspree-Client` header to satisfy CORS
+    // let headers: { [key: string]: string } = {
+    //   'Formspree-Client': clientHeader(opts.clientName)
+    // };
+
+    let headers: { [key: string]: string } = {};
 
     if (!(data instanceof FormData)) {
       headers['Content-Type'] = 'application/json';

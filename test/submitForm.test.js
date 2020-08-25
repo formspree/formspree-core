@@ -48,42 +48,44 @@ it('resolves with body and response when successful', () => {
     });
 });
 
-it('uses a default client header if none is given', () => {
-  const mockFetch = (_url, props) => {
-    expect(props.headers['Formspree-Client']).toEqual(
-      `@formspree/core@${version}`
-    );
+// For now, drop the `Formspree-Client` header to satisfy CORS
 
-    return success;
-  };
+// it('uses a default client header if none is given', () => {
+//   const mockFetch = (_url, props) => {
+//     expect(props.headers['Formspree-Client']).toEqual(
+//       `@formspree/core@${version}`
+//     );
 
-  return createClient({ projectKey: '111' }).submitForm(
-    'newsletter',
-    {},
-    {
-      fetchImpl: mockFetch
-    }
-  );
-});
+//     return success;
+//   };
 
-it('puts given client name in the client header', () => {
-  const mockFetch = (_url, props) => {
-    expect(props.headers['Formspree-Client']).toEqual(
-      `my-client @formspree/core@${version}`
-    );
+//   return createClient({ projectKey: '111' }).submitForm(
+//     'newsletter',
+//     {},
+//     {
+//       fetchImpl: mockFetch
+//     }
+//   );
+// });
 
-    return success;
-  };
+// it('puts given client name in the client header', () => {
+//   const mockFetch = (_url, props) => {
+//     expect(props.headers['Formspree-Client']).toEqual(
+//       `my-client @formspree/core@${version}`
+//     );
 
-  return createClient({ projectKey: '111' }).submitForm(
-    'newsletter',
-    {},
-    {
-      clientName: 'my-client',
-      fetchImpl: mockFetch
-    }
-  );
-});
+//     return success;
+//   };
+
+//   return createClient({ projectKey: '111' }).submitForm(
+//     'newsletter',
+//     {},
+//     {
+//       clientName: 'my-client',
+//       fetchImpl: mockFetch
+//     }
+//   );
+// });
 
 it('sets content type to json if data is not FormData', () => {
   const mockFetch = (_url, props) => {
