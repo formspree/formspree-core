@@ -50,8 +50,8 @@ it('resolves with body and response when successful', () => {
 
 it('uses a default client header if none is given', () => {
   const mockFetch = (_url, props) => {
-    expect(props.headers['StaticKit-Client']).toEqual(
-      `@statickit/core@${version}`
+    expect(props.headers['Formspree-Client']).toEqual(
+      `@formspree/core@${version}`
     );
 
     return success;
@@ -68,8 +68,8 @@ it('uses a default client header if none is given', () => {
 
 it('puts given client name in the client header', () => {
   const mockFetch = (_url, props) => {
-    expect(props.headers['StaticKit-Client']).toEqual(
-      `my-client @statickit/core@${version}`
+    expect(props.headers['Formspree-Client']).toEqual(
+      `my-client @formspree/core@${version}`
     );
 
     return success;

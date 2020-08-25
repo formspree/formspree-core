@@ -68,7 +68,7 @@ export const camelizeTopKeys = (obj: {
  * @param givenLabel
  */
 export const clientHeader = (givenLabel: string | undefined): string => {
-  const label = `@statickit/core@${version}`;
+  const label = `@formspree/core@${version}`;
   if (!givenLabel) return label;
   return `${givenLabel} ${label}`;
 };
