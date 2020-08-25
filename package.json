@@ -1,14 +1,14 @@
 {
-  "name": "@statickit/core",
+  "name": "@formspree/core",
   "version": "2.5.1",
-  "description": "The core library for StaticKit",
-  "homepage": "https://statickit.com",
+  "description": "The core library for Formspree",
+  "homepage": "https://formspree.io",
   "bugs": {
-    "url": "https://github.com/unstacked/statickit-core/issues"
+    "url": "https://github.com/formspree/formspree-core/issues"
   },
   "repository": {
     "type": "git",
-    "url": "https://github.com/unstacked/statickit-core.git"
+    "url": "https://github.com/formspree/formspree-core.git"
   },
   "license": "MIT",
   "author": "Derrick Reimer",
@@ -17,8 +17,8 @@
     "forms.d.ts",
     "functions.d.ts"
   ],
-  "main": "dist/statickit.cjs.js",
-  "module": "dist/statickit.esm.js",
+  "main": "dist/formspree.cjs.js",
+  "module": "dist/formspree.esm.js",
   "types": "dist/types/src/index.d.ts",
   "scripts": {
     "build": "rm -rf dist && npm run build:types && npm run build:js",

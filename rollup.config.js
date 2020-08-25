@@ -52,8 +52,8 @@ export default [
     ],
     output: {
       format: 'iife',
-      name: 'StaticKit',
-      file: 'dist/statickit.iife.js'
+      name: 'Formspree',
+      file: 'dist/formspree.iife.js'
     }
   }
 ];
