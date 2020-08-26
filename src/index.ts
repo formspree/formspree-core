@@ -68,11 +68,12 @@ export class Client {
     //   'Formspree-Client': clientHeader(opts.clientName)
     // };
 
-    let headers: { [key: string]: string } = {};
+    let headers: { [key: string]: string } = {
+      Accept: 'application/json'
+    };
 
     if (!(data instanceof FormData)) {
       headers['Content-Type'] = 'application/json';
-      headers['Accept'] = 'application/json';
     }
 
     let request = {
