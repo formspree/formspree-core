@@ -72,6 +72,7 @@ export class Client {
 
     if (!(data instanceof FormData)) {
       headers['Content-Type'] = 'application/json';
+      headers['Accept'] = 'application/json';
     }
 
     let request = {
