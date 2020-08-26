@@ -59,18 +59,14 @@ export class Client {
       return JSON.stringify(data);
     };
 
-    if (this.session) {
-      append(data, '_t', encode64(this.session.data()));
-    }
-
-    // For now, drop the `Formspree-Client` header to satisfy CORS
-    // let headers: { [key: string]: string } = {
-    //   'Formspree-Client': clientHeader(opts.clientName)
-    // };
-
     let headers: { [key: string]: string } = {
-      Accept: 'application/json'
+      Accept: 'application/json',
+      'Formspree-Client': clientHeader(opts.clientName)
     };
+
+    if (this.session) {
+      headers['Formspree-Session-Data'] = encode64(this.session.data());
+    }
 
     if (!(data instanceof FormData)) {
       headers['Content-Type'] = 'application/json';
