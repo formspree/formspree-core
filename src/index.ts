@@ -6,7 +6,7 @@ import {
   SubmissionBody,
   SubmissionResponse
 } from './forms';
-import { clientHeader, encode64, append } from './utils';
+import { clientHeader, encode64 } from './utils';
 import { Session } from './session';
 
 export interface Config {

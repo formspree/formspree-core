@@ -12,11 +12,11 @@ interface SuccessBody {
 }
 
 interface ErrorBody {
-  errors: Array<{
+  error: string;
+  validationErrors?: Array<{
     field: string;
-    message: string;
     code: string | null;
-    properties: object;
+    message: string;
   }>;
 }
 
