@@ -12,9 +12,8 @@ interface SuccessBody {
 }
 
 interface ErrorBody {
-  error: string;
-  validationErrors?: Array<{
-    field: string;
+  errors: Array<{
+    field?: string;
     code: string | null;
     message: string;
   }>;
