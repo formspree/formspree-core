@@ -71,7 +71,7 @@
     "typescript": "^3.7.4"
   },
   "publishConfig": {
-    "access": "public"
+    "access": "restricted"
   },
   "np": {
     "yarn": false
