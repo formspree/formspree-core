@@ -50,7 +50,7 @@ export class Client {
     data: SubmissionData,
     opts: SubmissionOptions = {}
   ): Promise<SubmissionResponse> {
-    let endpoint = opts.endpoint || 'https://formspree-react.herokuapp.com';
+    let endpoint = opts.endpoint || 'https://formspree.io';
     let fetchImpl = opts.fetchImpl || fetchPonyfill({ Promise }).fetch;
     let url = `${endpoint}/p/${this.projectKey}/f/${formKey}`;
 

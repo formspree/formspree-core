@@ -25,9 +25,7 @@ it('resolves with body and response when successful', () => {
   const mockFetch = (url, props) => {
     expect(props.method).toEqual('POST');
     expect(props.mode).toEqual('cors');
-    expect(url).toEqual(
-      'https://formspree-react.herokuapp.com/p/111/f/newsletter'
-    );
+    expect(url).toEqual('https://formspree.io/p/111/f/newsletter');
     return success;
   };
 
