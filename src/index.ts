@@ -10,14 +10,14 @@ import { clientHeader, encode64 } from './utils';
 import { Session } from './session';
 
 export interface Config {
-  projectKey: string;
+  projectKey?: string;
 }
 
 export class Client {
-  projectKey: string;
+  projectKey: string | undefined;
   private session: Session | undefined;
 
-  constructor(config: Config) {
+  constructor(config: Config = {}) {
     this.projectKey = config.projectKey;
     if (typeof window !== 'undefined') this.startBrowserSession();
   }
@@ -52,7 +52,9 @@ export class Client {
   ): Promise<SubmissionResponse> {
     let endpoint = opts.endpoint || 'https://formspree.io';
     let fetchImpl = opts.fetchImpl || fetchPonyfill({ Promise }).fetch;
-    let url = `${endpoint}/p/${this.projectKey}/f/${formKey}`;
+    let url = this.projectKey
+      ? `${endpoint}/p/${this.projectKey}/f/${formKey}`
+      : `${endpoint}/f/${formKey}`;
 
     const serializeBody = (data: SubmissionData): FormData | string => {
       if (data instanceof FormData) return data;
@@ -92,6 +94,6 @@ export class Client {
 /**
  * Constructs the client object.
  */
-export const createClient = (config: Config): Client => {
+export const createClient = (config?: Config): Client => {
   return new Client(config);
 };

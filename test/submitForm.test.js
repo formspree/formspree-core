@@ -46,6 +46,31 @@ it('resolves with body and response when successful', () => {
     });
 });
 
+it('uses the form URL when no project key is provided', () => {
+  const mockFetch = (url, props) => {
+    expect(props.method).toEqual('POST');
+    expect(props.mode).toEqual('cors');
+    expect(url).toEqual('https://formspree.io/f/xxyyhashid');
+    return success;
+  };
+
+  return createClient()
+    .submitForm(
+      'xxyyhashid',
+      {},
+      {
+        fetchImpl: mockFetch
+      }
+    )
+    .then(({ body, response }) => {
+      expect(body.id).toEqual('xxx');
+      expect(response.status).toEqual(200);
+    })
+    .catch(e => {
+      throw e;
+    });
+});
+
 it('uses a default client header if none is given', () => {
   const mockFetch = (_url, props) => {
     expect(props.headers['Formspree-Client']).toEqual(
