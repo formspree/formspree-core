@@ -97,3 +97,18 @@ export class Client {
 export const createClient = (config?: Config): Client => {
   return new Client(config);
 };
+
+/**
+ * Fetches the global default client.
+ */
+export const getDefaultClient = (): Client => {
+  if (!defaultClientSingleton) {
+    defaultClientSingleton = createClient();
+  }
+  return defaultClientSingleton;
+};
+
+/**
+ * The global default client. Note, this client may not get torn down.
+ */
+let defaultClientSingleton: Client;
