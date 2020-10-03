@@ -10,15 +10,15 @@ import { clientHeader, encode64 } from './utils';
 import { Session } from './session';
 
 export interface Config {
-  projectKey: string;
+  project?: string;
 }
 
 export class Client {
-  projectKey: string;
+  project: string | undefined;
   private session: Session | undefined;
 
-  constructor(config: Config) {
-    this.projectKey = config.projectKey;
+  constructor(config: Config = {}) {
+    this.project = config.project;
     if (typeof window !== 'undefined') this.startBrowserSession();
   }
 
@@ -52,7 +52,9 @@ export class Client {
   ): Promise<SubmissionResponse> {
     let endpoint = opts.endpoint || 'https://formspree.io';
     let fetchImpl = opts.fetchImpl || fetchPonyfill({ Promise }).fetch;
-    let url = `${endpoint}/p/${this.projectKey}/f/${formKey}`;
+    let url = this.project
+      ? `${endpoint}/p/${this.project}/f/${formKey}`
+      : `${endpoint}/f/${formKey}`;
 
     const serializeBody = (data: SubmissionData): FormData | string => {
       if (data instanceof FormData) return data;
@@ -92,6 +94,21 @@ export class Client {
 /**
  * Constructs the client object.
  */
-export const createClient = (config: Config): Client => {
+export const createClient = (config?: Config): Client => {
   return new Client(config);
 };
+
+/**
+ * Fetches the global default client.
+ */
+export const getDefaultClient = (): Client => {
+  if (!defaultClientSingleton) {
+    defaultClientSingleton = createClient();
+  }
+  return defaultClientSingleton;
+};
+
+/**
+ * The global default client. Note, this client may not get torn down.
+ */
+let defaultClientSingleton: Client;

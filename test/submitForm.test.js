@@ -25,13 +25,38 @@ it('resolves with body and response when successful', () => {
   const mockFetch = (url, props) => {
     expect(props.method).toEqual('POST');
     expect(props.mode).toEqual('cors');
-    expect(url).toEqual('https://formspree.io/p/111/f/newsletter');
+    expect(/^https:\/\/.+\/p\/111\/f\/newsletter$/.test(url)).toEqual(true);
     return success;
   };
 
-  return createClient({ projectKey: '111' })
+  return createClient({ project: '111' })
     .submitForm(
       'newsletter',
+      {},
+      {
+        fetchImpl: mockFetch
+      }
+    )
+    .then(({ body, response }) => {
+      expect(body.id).toEqual('xxx');
+      expect(response.status).toEqual(200);
+    })
+    .catch(e => {
+      throw e;
+    });
+});
+
+it('uses the form URL when no project key is provided', () => {
+  const mockFetch = (url, props) => {
+    expect(props.method).toEqual('POST');
+    expect(props.mode).toEqual('cors');
+    expect(/^https:\/\/.+\/f\/xxyyhashid$/.test(url)).toEqual(true);
+    return success;
+  };
+
+  return createClient()
+    .submitForm(
+      'xxyyhashid',
       {},
       {
         fetchImpl: mockFetch
@@ -55,7 +80,7 @@ it('uses a default client header if none is given', () => {
     return success;
   };
 
-  return createClient({ projectKey: '111' }).submitForm(
+  return createClient({ project: '111' }).submitForm(
     'newsletter',
     {},
     {
@@ -73,7 +98,7 @@ it('puts given client name in the client header', () => {
     return success;
   };
 
-  return createClient({ projectKey: '111' }).submitForm(
+  return createClient({ project: '111' }).submitForm(
     'newsletter',
     {},
     {
@@ -92,7 +117,7 @@ it('sets content type to json if data is not FormData', () => {
     return success;
   };
 
-  return createClient({ projectKey: '111' }).submitForm(
+  return createClient({ project: '111' }).submitForm(
     'newsletter',
     { foo: 'bar' },
     { fetchImpl: mockFetch }
@@ -108,7 +133,7 @@ it('sends telemetry data if session is started', () => {
     return success;
   };
 
-  const client = createClient({ projectKey: '111' });
+  const client = createClient({ project: '111' });
   client.startBrowserSession();
   return client.submitForm('newsletter', {}, { fetchImpl: mockFetch });
 });
