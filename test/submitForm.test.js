@@ -29,7 +29,7 @@ it('resolves with body and response when successful', () => {
     return success;
   };
 
-  return createClient({ project: '111' })
+  return createClient({ projectKey: '111' })
     .submitForm(
       'newsletter',
       {},
@@ -80,7 +80,7 @@ it('uses a default client header if none is given', () => {
     return success;
   };
 
-  return createClient({ project: '111' }).submitForm(
+  return createClient({ projectKey: '111' }).submitForm(
     'newsletter',
     {},
     {
@@ -98,7 +98,7 @@ it('puts given client name in the client header', () => {
     return success;
   };
 
-  return createClient({ project: '111' }).submitForm(
+  return createClient({ projectKey: '111' }).submitForm(
     'newsletter',
     {},
     {
@@ -117,7 +117,7 @@ it('sets content type to json if data is not FormData', () => {
     return success;
   };
 
-  return createClient({ project: '111' }).submitForm(
+  return createClient({ projectKey: '111' }).submitForm(
     'newsletter',
     { foo: 'bar' },
     { fetchImpl: mockFetch }
@@ -133,7 +133,7 @@ it('sends telemetry data if session is started', () => {
     return success;
   };
 
-  const client = createClient({ project: '111' });
+  const client = createClient({ projectKey: '111' });
   client.startBrowserSession();
   return client.submitForm('newsletter', {}, { fetchImpl: mockFetch });
 });
