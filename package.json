@@ -1,6 +1,6 @@
 {
   "name": "@formspree/core",
-  "version": "2.6.1",
+  "version": "2.6.2",
   "description": "The core library for Formspree",
   "homepage": "https://formspree.io",
   "bugs": {
