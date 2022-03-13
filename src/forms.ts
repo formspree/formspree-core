@@ -6,12 +6,12 @@ export interface SubmissionOptions {
   fetchImpl?: typeof fetch;
 }
 
-interface SuccessBody {
+export interface SuccessBody {
   id: string;
   data: object;
 }
 
-interface ErrorBody {
+export interface ErrorBody {
   errors: Array<{
     field?: string;
     code: string | null;
