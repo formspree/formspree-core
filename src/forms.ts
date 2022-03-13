@@ -13,7 +13,7 @@ interface ValidationError {
 }
 
 interface SubmissionBodyBase {
-  errors?: ValidationError[]
+  errors?: ValidationError[];
   id?: string;
   data?: object;
 }
@@ -24,11 +24,7 @@ interface SuccessBody extends SubmissionBodyBase {
 }
 
 interface ErrorBody extends SubmissionBodyBase {
-  errors: Array<{
-    field?: string;
-    code: string | null;
-    message: string;
-  }>;
+  errors: ValidationError[];
 }
 
 export type SubmissionBody = SuccessBody | ErrorBody;
