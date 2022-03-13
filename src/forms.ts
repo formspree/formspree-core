@@ -6,12 +6,24 @@ export interface SubmissionOptions {
   fetchImpl?: typeof fetch;
 }
 
-interface SuccessBody {
+interface ValidationError {
+  field?: string;
+  code: string | null;
+  message: string;
+}
+
+interface SubmissionBodyBase {
+  errors?: ValidationError[]
+  id?: string;
+  data?: object;
+}
+
+interface SuccessBody extends SubmissionBodyBase {
   id: string;
   data: object;
 }
 
-interface ErrorBody {
+interface ErrorBody extends SubmissionBodyBase {
   errors: Array<{
     field?: string;
     code: string | null;
