@@ -6,14 +6,32 @@ export interface SubmissionOptions {
   fetchImpl?: typeof fetch;
 }
 
+export type FormErrorCode =
+  | 'INACTIVE'
+  | 'BLOCKED'
+  | 'EMPTY'
+  | 'PROJECT_NOT_FOUND'
+  | 'FORM_NOT_FOUND'
+  | 'NO_FILE_UPLOADS'
+  | 'TOO_MANY_FILES'
+  | 'FILES_TOO_BIG';
+
+export type FieldErrorCode =
+  | 'REQUIRED_FIELD_MISSING'
+  | 'REQUIRED_FIELD_EMPTY'
+  | 'TYPE_EMAIL'
+  | 'TYPE_NUMERIC'
+  | 'TYPE_TEXT';
+
 export interface FormError {
   field?: string;
-  code: string | null;
+  code: FormErrorCode | FieldErrorCode | null;
   message: string;
 }
 
 export interface FieldError extends FormError {
   field: string;
+  code: FieldErrorCode | null;
 }
 
 export function isFieldError(error: FormError): error is FieldError {
