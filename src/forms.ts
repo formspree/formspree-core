@@ -1,9 +1,12 @@
+import { PaymentMethodResult } from '@stripe/stripe-js';
+
 export type SubmissionData = FormData | object;
 
 export interface SubmissionOptions {
   endpoint?: string;
   clientName?: string;
   fetchImpl?: typeof fetch;
+  handlePayment?: () => Promise<PaymentMethodResult>;
 }
 
 export interface FormError {
@@ -37,5 +40,5 @@ export function hasErrors(body: SubmissionBody): body is ErrorBody {
 
 export interface SubmissionResponse {
   body: SubmissionBody;
-  response: Response;
+  response: Response | null;
 }
