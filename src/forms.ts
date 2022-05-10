@@ -40,7 +40,10 @@ export interface FieldError extends FormError {
 }
 
 export function isFieldError(error: FormError): error is FieldError {
-  return (error as FieldError).code in FieldErrorCodeEnum;
+  return (
+    (error as FieldError).code in FieldErrorCodeEnum &&
+    (error as FieldError).field !== undefined
+  );
 }
 
 type KnownError<T> = T extends
