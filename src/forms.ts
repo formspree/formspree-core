@@ -9,18 +9,57 @@ export interface SubmissionOptions {
   handlePayment?: () => Promise<PaymentMethodResult>;
 }
 
+enum FormErrorCodeEnum {
+  INACTIVE = 'INACTIVE',
+  BLOCKED = 'BLOCKED',
+  EMPTY = 'EMPTY',
+  PROJECT_NOT_FOUND = 'PROJECT_NOT_FOUND',
+  FORM_NOT_FOUND = 'FORM_NOT_FOUND',
+  NO_FILE_UPLOADS = 'NO_FILE_UPLOADS',
+  TOO_MANY_FILES = 'TOO_MANY_FILES',
+  FILES_TOO_BIG = 'FILES_TOO_BIG'
+}
+
+enum FieldErrorCodeEnum {
+  REQUIRED_FIELD_MISSING = 'REQUIRED_FIELD_MISSING',
+  REQUIRED_FIELD_EMPTY = 'REQUIRED_FIELD_EMPTY',
+  TYPE_EMAIL = 'TYPE_EMAIL',
+  TYPE_NUMERIC = 'TYPE_NUMERIC',
+  TYPE_TEXT = 'TYPE_TEXT'
+}
+
+export type FormErrorCode = keyof typeof FormErrorCodeEnum;
+export type FieldErrorCode = keyof typeof FieldErrorCodeEnum;
+
 export interface FormError {
   field?: string;
-  code: string | null;
+  code?: FormErrorCode | FieldErrorCode;
   message: string;
 }
 
 export interface FieldError extends FormError {
   field: string;
+  code: FieldErrorCode;
 }
 
 export function isFieldError(error: FormError): error is FieldError {
-  return (error as FieldError).field !== undefined;
+  return (
+    (error as FieldError).code in FieldErrorCodeEnum &&
+    (error as FieldError).field !== undefined
+  );
+}
+
+type KnownError<T> = T extends
+  | { code: FormErrorCode }
+  | { code: FieldErrorCode }
+  ? T
+  : never;
+
+export function isKnownError(error: FormError): error is KnownError<FormError> {
+  return (
+    !!error.code &&
+    (error.code in FormErrorCodeEnum || error.code in FieldErrorCodeEnum)
+  );
 }
 
 export interface SuccessBody {

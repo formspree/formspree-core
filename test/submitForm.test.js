@@ -1,4 +1,5 @@
 import { createClient } from '../src';
+import { hasErrors, isKnownError } from '../src/forms';
 import { version } from '../package.json';
 
 // A fake success result for a mocked `fetch` call.
@@ -15,6 +16,20 @@ const success = new Promise((resolve, _reject) => {
     json: () => {
       return new Promise(resolve => {
         resolve({ id: 'xxx' });
+      });
+    }
+  };
+  resolve(response);
+});
+
+const failure = new Promise((resolve, _reject) => {
+  const response = {
+    status: 400,
+    json: () => {
+      return new Promise(resolve => {
+        resolve({
+          errors: [{ code: 'UNKNOWN', message: 'doh!' }]
+        });
       });
     }
   };
@@ -65,6 +80,29 @@ it('uses the form URL when no project key is provided', () => {
     .then(({ body, response }) => {
       expect(body.id).toEqual('xxx');
       expect(response.status).toEqual(200);
+    })
+    .catch(e => {
+      throw e;
+    });
+});
+
+it('handles errors returned from the server', () => {
+  const mockFetch = () => {
+    return failure;
+  };
+
+  return createClient()
+    .submitForm(
+      'xxyyhashid',
+      {},
+      {
+        fetchImpl: mockFetch
+      }
+    )
+    .then(({ body, response }) => {
+      expect(response.status).toEqual(400);
+      expect(hasErrors(body)).toEqual(true);
+      expect(isKnownError(body.errors[0])).toEqual(false);
     })
     .catch(e => {
       throw e;
