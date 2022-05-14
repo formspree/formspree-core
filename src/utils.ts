@@ -123,7 +123,6 @@ export const handleServerResponse = async (
 
     return await resubmitForm(stripeResult, response.resubmitKey);
   } else if (response.error) {
-    console.log(response.error);
     return {
       error: response.error,
       stripeResult: null,
@@ -131,7 +130,8 @@ export const handleServerResponse = async (
       requiresAction: false
     };
   } else {
-    console.log('Payment finished successfully');
+    // @TODO: Return this to the frontend
+    console.log('Successful payment');
     return null;
   }
 };

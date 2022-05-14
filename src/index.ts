@@ -92,7 +92,6 @@ export class Client {
 
       if (payload.error) {
         // Show error to user
-        console.log('Error creating payment method');
         return {
           response: null,
           body: {
@@ -123,7 +122,6 @@ export class Client {
           resubmitKey: string
         ) => {
           if (result.error) {
-            console.log('Stripe SCA error');
             return {
               response: serverResponse,
               body: {
@@ -157,7 +155,6 @@ export class Client {
 
               return resubmitResult;
             } else {
-              console.log('Stripe promise not initialised');
               return {
                 response: serverResponse,
                 body: {
@@ -192,7 +189,6 @@ export class Client {
             );
           });
         } else {
-          console.log('Stripe SCA error');
           return {
             response: serverResponse as any,
             body: {
