@@ -97,7 +97,7 @@ export class Client {
           body: {
             errors: [
               {
-                code: 'payment_method_error',
+                code: 'PAYMENT_METHOD_ERROR',
                 message: 'Error creating payment method',
                 field: 'paymentMethod'
               }
@@ -127,7 +127,7 @@ export class Client {
               body: {
                 errors: [
                   {
-                    code: 'stripe_sca_error',
+                    code: 'STRIPE_SCA_ERROR',
                     message: 'Stripe SCA error',
                     field: 'paymentMethod'
                   }
@@ -160,7 +160,7 @@ export class Client {
                 body: {
                   errors: [
                     {
-                      code: 'stripe_promise_error',
+                      code: 'STRIPE_PROMISE_ERROR',
                       message: 'Stripe promise not initialised',
                       field: 'paymentMethod'
                     }
@@ -180,21 +180,20 @@ export class Client {
         );
 
         if (serverResponse === null) {
-          // @TODO: handle here stripe logic
-          return fetchImpl(url, request).then(response => {
-            return response.json().then(
-              (body: SubmissionBody): SubmissionResponse => {
-                return { body, response };
-              }
-            );
-          });
+          return {
+            body: {
+              id: payload.paymentMethod.id,
+              data: responseData
+            },
+            response: { ...responseData, status: 200 }
+          };
         } else {
           return {
-            response: serverResponse as any,
+            response: serverResponse,
             body: {
               errors: [
                 {
-                  code: 'stripe_sca_error',
+                  code: 'STRIPE_SCA_ERROR',
                   message: 'Stripe SCA error',
                   field: 'paymentMethod'
                 }

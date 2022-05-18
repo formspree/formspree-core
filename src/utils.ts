@@ -84,6 +84,8 @@ export const now = (): number => {
 };
 
 export type ServerResponse = {
+  next?: string;
+  ok?: boolean;
   message: 'requires_action' | 'success' | 'error';
   resubmitKey: string | null;
   stripe: {
@@ -111,8 +113,11 @@ export const handleServerResponse = async (
     resubmitKey: string
   ) => Promise<HandleServerResponse | undefined>
 ): Promise<HandleServerResponse | undefined> => {
-  if (
+  if (response && (response.next || !!response.ok)) {
+    return null;
+  } else if (
     response &&
+    response.stripe &&
     response.stripe.requiresAction &&
     response.resubmitKey &&
     resubmitForm
@@ -130,8 +135,6 @@ export const handleServerResponse = async (
       requiresAction: false
     };
   } else {
-    // @TODO: Return this to the frontend
-    console.log('Successful payment');
     return null;
   }
 };
