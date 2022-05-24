@@ -113,7 +113,18 @@ export const handleServerResponse = async (
     resubmitKey: string
   ) => Promise<HandleServerResponse | undefined>
 ): Promise<HandleServerResponse | undefined> => {
-  if (response && (response.next || !!response.ok)) {
+  if (response.message && !response.ok) {
+    return {
+      error: {
+        code: response.message,
+        message: response.message,
+        field: 'paymentMethod'
+      },
+      stripeResult: null,
+      resubmitKey: null,
+      requiresAction: false
+    };
+  } else if (response.next && !!response.ok) {
     return null;
   } else if (
     response &&
@@ -127,13 +138,6 @@ export const handleServerResponse = async (
     );
 
     return await resubmitForm(stripeResult, response.resubmitKey);
-  } else if (response.error) {
-    return {
-      error: response.error,
-      stripeResult: null,
-      resubmitKey: null,
-      requiresAction: false
-    };
   } else {
     return null;
   }

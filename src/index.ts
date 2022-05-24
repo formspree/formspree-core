@@ -123,7 +123,8 @@ export class Client {
         ) => {
           if (result.error) {
             return {
-              response: serverResponse,
+              // @TODO: figure out where to get the status code later on
+              response: { ...serverResponse, status: 402 },
               body: {
                 errors: [
                   {
@@ -156,7 +157,8 @@ export class Client {
               return resubmitResult;
             } else {
               return {
-                response: serverResponse,
+                // @TODO: figure out where to get the status code later on
+                response: { ...serverResponse, status: 402 },
                 body: {
                   errors: [
                     {
@@ -185,19 +187,15 @@ export class Client {
               id: payload.paymentMethod.id,
               data: responseData
             },
+            // @TODO: figure out where to get the status code later on
             response: { ...responseData, status: 200 }
           };
         } else {
           return {
-            response: serverResponse,
+            // @TODO: figure out where to get the status code later on
+            response: { ...serverResponse, status: 402 },
             body: {
-              errors: [
-                {
-                  code: 'STRIPE_SCA_ERROR',
-                  message: 'Stripe SCA error',
-                  field: 'paymentMethod'
-                }
-              ]
+              errors: [serverResponse.error]
             }
           };
         }

@@ -1,4 +1,4 @@
-import { PaymentMethodResult } from '@stripe/stripe-js';
+import { PaymentMethodResult, StripeErrorType } from '@stripe/stripe-js';
 
 export type SubmissionData = FormData | object;
 
@@ -36,7 +36,8 @@ export type FieldErrorCode = keyof typeof FieldErrorCodeEnum;
 
 export interface FormError {
   field?: string;
-  code?: FormErrorCode | FieldErrorCode;
+  // @TODO: provide Stripe error codes from Formspree API so we can change the string type here to StripeErrorType
+  code?: FormErrorCode | FieldErrorCode | string;
   message: string;
 }
 
