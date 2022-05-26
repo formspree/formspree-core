@@ -1,6 +1,6 @@
-import { PaymentMethodResult, StripeErrorType } from '@stripe/stripe-js';
+import { PaymentMethodResult } from '@stripe/stripe-js';
 
-export type SubmissionData = FormData | object;
+export type SubmissionData = FormData | any;
 
 export interface SubmissionOptions {
   endpoint?: string;
