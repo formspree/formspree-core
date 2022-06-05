@@ -142,3 +142,15 @@ export const handleServerResponse = async (
     return null;
   }
 };
+
+export const appendExtraData = (
+  formData: FormData | object,
+  prop: string,
+  value: string
+) => {
+  if (formData instanceof FormData) {
+    formData.append(prop, value);
+  } else {
+    formData = Object.assign(formData, { [prop]: value });
+  }
+};

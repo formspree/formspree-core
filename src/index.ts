@@ -7,7 +7,12 @@ import {
   SubmissionBody,
   SubmissionResponse
 } from './forms';
-import { clientHeader, encode64, handleServerResponse } from './utils';
+import {
+  appendExtraData,
+  clientHeader,
+  encode64,
+  handleServerResponse
+} from './utils';
 import { Session } from './session';
 
 export interface Config {
@@ -86,9 +91,9 @@ export class Client {
       headers
     };
 
-    if (this.stripePromise && opts.handlePayment) {
+    if (this.stripePromise && opts.createPaymentMethod) {
       // Get Stripe payload
-      const payload = await opts.handlePayment();
+      const payload = await opts.createPaymentMethod();
 
       if (payload.error) {
         // Show error to user
@@ -106,12 +111,11 @@ export class Client {
         };
       } else {
         // Hit Formspree server with the payment method id to handle the payment
+
+        appendExtraData(data, 'paymentMethod', payload.paymentMethod.id);
         const response = await fetchImpl(url, {
           ...request,
-          body: serializeBody({
-            ...data,
-            paymentMethod: payload.paymentMethod.id
-          })
+          body: data
         });
         const responseData = await response.json();
 
@@ -124,7 +128,7 @@ export class Client {
           if (result.error) {
             return {
               // @TODO: figure out where to get the status code later on
-              response: { ...serverResponse, status: 402 },
+              response: { ...responseData, status: 402 },
               body: {
                 errors: [
                   {
@@ -136,14 +140,13 @@ export class Client {
               }
             };
           } else {
+            appendExtraData(data, 'paymentMethod', payload.paymentMethod.id);
+            appendExtraData(data, 'paymentIntent', result.paymentIntent.id);
+            appendExtraData(data, 'resubmitKey', resubmitKey);
+
             const resSubmitResponse = await fetchImpl(url, {
               ...request,
-              body: serializeBody({
-                ...data,
-                paymentMethod: payload.paymentMethod.id,
-                paymentIntent: result.paymentIntent.id,
-                resubmitKey: resubmitKey
-              })
+              body: data
             });
             const resSubmitData = await resSubmitResponse.json();
 
@@ -158,7 +161,7 @@ export class Client {
             } else {
               return {
                 // @TODO: figure out where to get the status code later on
-                response: { ...serverResponse, status: 402 },
+                response: { ...stripePluginResponse, status: 402 },
                 body: {
                   errors: [
                     {
@@ -175,13 +178,13 @@ export class Client {
 
         // Server side validation
         // @ts-ignore
-        const serverResponse = await handleServerResponse(
+        const stripePluginResponse = await handleServerResponse(
           this.stripePromise,
           responseData,
           resubmitForm
         );
 
-        if (serverResponse === null) {
+        if (stripePluginResponse === null) {
           return {
             body: {
               id: payload.paymentMethod.id,
@@ -193,9 +196,9 @@ export class Client {
         } else {
           return {
             // @TODO: figure out where to get the status code later on
-            response: { ...serverResponse, status: 402 },
+            response: { ...stripePluginResponse, status: 402 },
             body: {
-              errors: [serverResponse.error]
+              errors: [stripePluginResponse.error]
             }
           };
         }

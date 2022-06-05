@@ -6,7 +6,7 @@ export interface SubmissionOptions {
   endpoint?: string;
   clientName?: string;
   fetchImpl?: typeof fetch;
-  handlePayment?: () => Promise<PaymentMethodResult>;
+  createPaymentMethod?: () => Promise<PaymentMethodResult>;
 }
 
 enum FormErrorCodeEnum {
