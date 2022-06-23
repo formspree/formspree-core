@@ -1,18 +1,13 @@
 import PromisePolyfill from 'promise-polyfill';
 import fetchPonyfill from 'fetch-ponyfill';
-import { PaymentIntentResult, Stripe } from '@stripe/stripe-js';
+import { Stripe } from '@stripe/stripe-js';
 import {
   SubmissionData,
   SubmissionOptions,
   SubmissionBody,
   SubmissionResponse
 } from './forms';
-import {
-  appendExtraData,
-  clientHeader,
-  encode64,
-  handleServerResponse
-} from './utils';
+import { appendExtraData, clientHeader, encode64 } from './utils';
 import { Session } from './session';
 
 export interface Config {
@@ -91,12 +86,13 @@ export class Client {
       headers
     };
 
+    // first check if we need to add the stripe paymentMethod
     if (this.stripePromise && opts.createPaymentMethod) {
       // Get Stripe payload
       const payload = await opts.createPaymentMethod();
 
       if (payload.error) {
-        // Show error to user
+        // Return the error in case Stripe failed to create a payment method
         return {
           response: null,
           body: {
@@ -109,100 +105,104 @@ export class Client {
             ]
           }
         };
-      } else {
-        // Hit Formspree server with the payment method id to handle the payment
+      }
 
-        appendExtraData(data, 'paymentMethod', payload.paymentMethod.id);
-        const response = await fetchImpl(url, {
-          ...request,
-          body: data
-        });
-        const responseData = await response.json();
+      // Add the paymentMethod to the data
+      appendExtraData(data, 'paymentMethod', payload.paymentMethod.id);
 
-        // Prepare resubmission logic in case SCA was needed
-        // @ts-ignore
-        const resubmitForm = async (
-          result: PaymentIntentResult,
-          resubmitKey: string
-        ) => {
-          if (result.error) {
-            return {
-              // @TODO: figure out where to get the status code later on
-              response: { ...responseData, status: 402 },
-              body: {
-                errors: [
-                  {
-                    code: 'STRIPE_SCA_ERROR',
-                    message: 'Stripe SCA error',
-                    field: 'paymentMethod'
-                  }
-                ]
-              }
-            };
-          } else {
-            appendExtraData(data, 'paymentMethod', payload.paymentMethod.id);
-            appendExtraData(data, 'paymentIntent', result.paymentIntent.id);
-            appendExtraData(data, 'resubmitKey', resubmitKey);
+      // Send a request to Formspree server to handle the payment method
+      const response = await fetchImpl(url, {
+        ...request,
+        body: data
+      });
+      const responseData = await response.json();
 
-            const resSubmitResponse = await fetchImpl(url, {
-              ...request,
-              body: data
-            });
-            const resSubmitData = await resSubmitResponse.json();
-
-            if (this.stripePromise) {
-              const resubmitResult = await handleServerResponse(
-                this.stripePromise,
-                resSubmitData,
-                resubmitForm
-              );
-
-              return resubmitResult;
-            } else {
-              return {
-                // @TODO: figure out where to get the status code later on
-                response: { ...stripePluginResponse, status: 402 },
-                body: {
-                  errors: [
-                    {
-                      code: 'STRIPE_PROMISE_ERROR',
-                      message: 'Stripe promise not initialised',
-                      field: 'paymentMethod'
-                    }
-                  ]
-                }
-              };
-            }
+      // Handle server side errors
+      if (responseData.error) {
+        return {
+          response,
+          body: {
+            errors: responseData.errors
           }
         };
+      }
 
-        // Server side validation
-        // @ts-ignore
-        const stripePluginResponse = await handleServerResponse(
-          this.stripePromise,
-          responseData,
-          resubmitForm
+      // Handle success response
+      if (responseData.next && responseData.ok) {
+        return {
+          response,
+          body: responseData
+        };
+      }
+
+      // Handle SCA
+      if (
+        responseData &&
+        responseData.stripe &&
+        responseData.stripe.requiresAction &&
+        responseData.resubmitKey
+      ) {
+        const stripeResult = await this.stripePromise.handleCardAction(
+          responseData.stripe.paymentIntentClientSecret
         );
 
-        if (stripePluginResponse === null) {
+        // Handle Stripe error
+        if (stripeResult.error) {
           return {
+            response,
             body: {
-              id: payload.paymentMethod.id,
-              data: responseData
-            },
-            // @TODO: figure out where to get the status code later on
-            response: { ...responseData, status: 200 }
-          };
-        } else {
-          return {
-            // @TODO: figure out where to get the status code later on
-            response: { ...stripePluginResponse, status: 402 },
-            body: {
-              errors: [stripePluginResponse.error]
+              errors: [
+                {
+                  code: 'STRIPE_SCA_ERROR',
+                  message: 'Stripe SCA error',
+                  field: 'paymentMethod'
+                }
+              ]
             }
           };
+        } else {
+          if (!payload.paymentMethod.id) {
+            appendExtraData(data, 'paymentMethod', payload.paymentMethod.id);
+          }
+          appendExtraData(data, 'paymentIntent', stripeResult.paymentIntent.id);
+          appendExtraData(data, 'resubmitKey', responseData.resubmitKey);
+
+          // Resubmit the form with the paymentIntent and resubmitKey
+          const resSubmitResponse = await fetchImpl(url, {
+            ...request,
+            body: JSON.stringify({
+              paymentIntent: stripeResult.paymentIntent.id,
+              resubmitKey: responseData.resubmitKey
+            })
+          });
+          const resSubmitData = await resSubmitResponse.json();
+
+          // Handle success for resubmission
+          if (resSubmitData.next && resSubmitData.ok) {
+            return {
+              response: resSubmitResponse,
+              body: resSubmitData
+            };
+          }
+
+          // Handle server side errors for resubmission
+          if (resSubmitData.errors) {
+            return {
+              response: resSubmitResponse,
+              body: {
+                errors: resSubmitData.errors
+              }
+            };
+          }
         }
       }
+
+      return {
+        response,
+        body: {
+          errors: responseData.errors
+        }
+      };
     } else {
       return fetchImpl(url, request).then(response => {
         return response.json().then(

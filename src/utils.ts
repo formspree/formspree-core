@@ -1,8 +1,6 @@
 // @ts-ignore
 import { btoa } from './base64';
 import { version } from '../package.json';
-import { PaymentIntentResult, Stripe } from '@stripe/stripe-js';
-import { FormError } from './forms';
 
 /**
  * Base-64 encodes a (JSON-castable) object.
@@ -81,66 +79,6 @@ export const clientHeader = (givenLabel: string | undefined): string => {
 export const now = (): number => {
   // @ts-ignore
   return 1 * new Date();
-};
-
-export type ServerResponse = {
-  next?: string;
-  ok?: boolean;
-  message: 'requires_action' | 'success' | 'error';
-  resubmitKey: string | null;
-  stripe: {
-    paymentIntentId: string;
-    paymentIntentClientSecret: string;
-    requiresAction: boolean;
-  };
-  error: Pick<FormError, 'code' | 'message'> & {
-    field: 'paymentMethod';
-  };
-};
-
-export type HandleServerResponse =
-  | (Pick<ServerResponse, 'error' | 'resubmitKey'> & {
-      stripeResult: PaymentIntentResult | null;
-      requiresAction: boolean;
-    })
-  | null;
-
-export const handleServerResponse = async (
-  stripe: Stripe,
-  response: ServerResponse,
-  resubmitForm?: (
-    result: PaymentIntentResult,
-    resubmitKey: string
-  ) => Promise<HandleServerResponse | undefined>
-): Promise<HandleServerResponse | undefined> => {
-  if (response.message && !response.ok) {
-    return {
-      error: {
-        code: response.message,
-        message: response.message,
-        field: 'paymentMethod'
-      },
-      stripeResult: null,
-      resubmitKey: null,
-      requiresAction: false
-    };
-  } else if (response.next && !!response.ok) {
-    return null;
-  } else if (
-    response &&
-    response.stripe &&
-    response.stripe.requiresAction &&
-    response.resubmitKey &&
-    resubmitForm
-  ) {
-    const stripeResult = await stripe.handleCardAction(
-      response.stripe.paymentIntentClientSecret
-    );
-
-    return await resubmitForm(stripeResult, response.resubmitKey);
-  } else {
-    return null;
-  }
 };
 
 export const appendExtraData = (

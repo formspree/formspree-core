@@ -39,6 +39,9 @@ export interface FormError {
   // @TODO: provide Stripe error codes from Formspree API so we can change the string type here to StripeErrorType
   code?: FormErrorCode | FieldErrorCode | string;
   message: string;
+  details?: {
+    stripeCode: string;
+  };
 }
 
 export interface FieldError extends FormError {
