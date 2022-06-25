@@ -18,9 +18,7 @@ enum FormErrorCodeEnum {
   NO_FILE_UPLOADS = 'NO_FILE_UPLOADS',
   TOO_MANY_FILES = 'TOO_MANY_FILES',
   FILES_TOO_BIG = 'FILES_TOO_BIG',
-  STRIPE_SCA_ERROR = 'STRIPE_SCA_ERROR',
-  STRIPE_PROMISE_ERROR = 'STRIPE_PROMISE_ERROR',
-  PAYMENT_METHOD_ERROR = 'PAYMENT_METHOD_ERROR'
+  STRIPE_CLIENT_ERROR = 'STRIPE_CLIENT_ERROR'
 }
 
 enum FieldErrorCodeEnum {
@@ -36,11 +34,10 @@ export type FieldErrorCode = keyof typeof FieldErrorCodeEnum;
 
 export interface FormError {
   field?: string;
-  // @TODO: provide Stripe error codes from Formspree API so we can change the string type here to StripeErrorType
-  code?: FormErrorCode | FieldErrorCode | string;
+  code?: FormErrorCode | FieldErrorCode;
   message: string;
   details?: {
-    stripeCode: string;
+    stripeCode?: string;
   };
 }
 

@@ -7,7 +7,7 @@ import {
   SubmissionBody,
   SubmissionResponse
 } from './forms';
-import { appendExtraData, clientHeader, encode64 } from './utils';
+import { appendExtraData, clientHeader, encode64, handleSCA } from './utils';
 import { Session } from './session';
 
 export interface Config {
@@ -98,7 +98,7 @@ export class Client {
           body: {
             errors: [
               {
-                code: 'PAYMENT_METHOD_ERROR',
+                code: 'STRIPE_CLIENT_ERROR',
                 message: 'Error creating payment method',
                 field: 'paymentMethod'
               }
@@ -117,24 +117,6 @@ export class Client {
       });
       const responseData = await response.json();
 
-      // Handle server side errors
-      if (responseData.error) {
-        return {
-          response,
-          body: {
-            errors: responseData.errors
-          }
-        };
-      }
-
-      // Handle success response
-      if (responseData.next && responseData.ok) {
-        return {
-          response,
-          body: responseData
-        };
-      }
-
       // Handle SCA
       if (
         responseData &&
@@ -142,66 +124,21 @@ export class Client {
         responseData.stripe.requiresAction &&
         responseData.resubmitKey
       ) {
-        const stripeResult = await this.stripePromise.handleCardAction(
-          responseData.stripe.paymentIntentClientSecret
-        );
-
-        // Handle Stripe error
-        if (stripeResult.error) {
-          return {
-            response,
-            body: {
-              errors: [
-                {
-                  code: 'STRIPE_SCA_ERROR',
-                  message: 'Stripe SCA error',
-                  field: 'paymentMethod'
-                }
-              ]
-            }
-          };
-        } else {
-          if (!payload.paymentMethod.id) {
-            appendExtraData(data, 'paymentMethod', payload.paymentMethod.id);
-          }
-          appendExtraData(data, 'paymentIntent', stripeResult.paymentIntent.id);
-          appendExtraData(data, 'resubmitKey', responseData.resubmitKey);
-
-          // Resubmit the form with the paymentIntent and resubmitKey
-          const resSubmitResponse = await fetchImpl(url, {
-            ...request,
-            body: JSON.stringify({
-              paymentIntent: stripeResult.paymentIntent.id,
-              resubmitKey: responseData.resubmitKey
-            })
-          });
-          const resSubmitData = await resSubmitResponse.json();
-
-          // Handle success for resubmission
-          if (resSubmitData.next && resSubmitData.ok) {
-            return {
-              response: resSubmitResponse,
-              body: resSubmitData
-            };
-          }
-
-          // Handle server side errors for resubmission
-          if (resSubmitData.errors) {
-            return {
-              response: resSubmitResponse,
-              body: {
-                errors: resSubmitData.errors
-              }
-            };
-          }
-        }
+        return await handleSCA({
+          stripePromise: this.stripePromise,
+          responseData,
+          response,
+          payload,
+          data,
+          fetchImpl,
+          request,
+          url
+        });
       }
 
       return {
         response,
-        body: {
-          errors: responseData.errors
-        }
+        body: responseData
       };
     } else {
       return fetchImpl(url, request).then(response => {
