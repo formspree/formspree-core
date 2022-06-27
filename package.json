@@ -59,7 +59,7 @@
     "husky": "^3.1.0",
     "jest": "^26.4.2",
     "lint-staged": "^9.5.0",
-    "np": "^6.4.0",
+    "np": "^3.0.4",
     "prettier": "^1.19.1",
     "rollup": "^1.28.0",
     "rollup-plugin-babel": "^4.3.3",
