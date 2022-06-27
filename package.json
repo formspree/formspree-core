@@ -12,23 +12,23 @@
   },
   "license": "MIT",
   "author": "Derrick Reimer",
+  "main": "dist/formspree.cjs.js",
+  "module": "dist/formspree.esm.js",
+  "types": "dist/types/src/index.d.ts",
   "files": [
     "dist/**/*.{js,ts}",
     "forms.d.ts"
   ],
-  "main": "dist/formspree.cjs.js",
-  "module": "dist/formspree.esm.js",
-  "types": "dist/types/src/index.d.ts",
   "scripts": {
-    "build": "rm -rf dist && npm run build:types && npm run build:js",
+    "build": "rm -rf dist && yarn run build:types && yarn run build:js",
     "build:js": "rollup -c",
     "build:types": "tsc --emitDeclarationOnly",
     "format": "npx prettier --write 'src/**/*.{js,ts}'",
-    "prepare": "npm run build",
+    "prepare": "yarn build",
     "release": "np",
     "test": "jest",
     "type-check": "tsc --noEmit",
-    "type-check:watch": "npm run type-check -- --watch"
+    "type-check:watch": "yarn run type-check -- --watch"
   },
   "husky": {
     "hooks": {
@@ -69,7 +69,7 @@
     "rollup-plugin-terser": "^7.0.0",
     "sort-package-json": "^1.36.0",
     "tslib": "^1.10.0",
-    "typescript": "^3.7.4"
+    "typescript": "^4.7.4"
   },
   "publishConfig": {
     "access": "public"
