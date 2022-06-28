@@ -12,23 +12,23 @@
   },
   "license": "MIT",
   "author": "Derrick Reimer",
+  "main": "dist/formspree.cjs.js",
+  "module": "dist/formspree.esm.js",
+  "types": "dist/types/src/index.d.ts",
   "files": [
     "dist/**/*.{js,ts}",
     "forms.d.ts"
   ],
-  "main": "dist/formspree.cjs.js",
-  "module": "dist/formspree.esm.js",
-  "types": "dist/types/src/index.d.ts",
   "scripts": {
-    "build": "rm -rf dist && npm run build:types && npm run build:js",
+    "build": "rm -rf dist && yarn run build:types && yarn run build:js",
     "build:js": "rollup -c",
     "build:types": "tsc --emitDeclarationOnly",
     "format": "npx prettier --write 'src/**/*.{js,ts}'",
-    "prepare": "npm run build",
+    "prepare": "yarn build",
     "release": "np",
     "test": "jest",
     "type-check": "tsc --noEmit",
-    "type-check:watch": "npm run type-check -- --watch"
+    "type-check:watch": "yarn run type-check -- --watch"
   },
   "husky": {
     "hooks": {
@@ -46,6 +46,7 @@
     ]
   },
   "dependencies": {
+    "@stripe/stripe-js": "^1.29.0",
     "@types/promise-polyfill": "^6.0.3",
     "fetch-ponyfill": "^6.1.0",
     "promise-polyfill": "^8.1.3"
@@ -58,7 +59,7 @@
     "husky": "^3.1.0",
     "jest": "^26.4.2",
     "lint-staged": "^9.5.0",
-    "np": "^6.4.0",
+    "np": "^3.0.4",
     "prettier": "^1.19.1",
     "rollup": "^1.28.0",
     "rollup-plugin-babel": "^4.3.3",
@@ -68,7 +69,7 @@
     "rollup-plugin-terser": "^7.0.0",
     "sort-package-json": "^1.36.0",
     "tslib": "^1.10.0",
-    "typescript": "^3.7.4"
+    "typescript": "^4.7.4"
   },
   "publishConfig": {
     "access": "public"

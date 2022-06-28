@@ -1,9 +1,12 @@
-export type SubmissionData = FormData | object;
+import { PaymentMethodResult } from '@stripe/stripe-js';
+
+export type SubmissionData = FormData | any;
 
 export interface SubmissionOptions {
   endpoint?: string;
   clientName?: string;
   fetchImpl?: typeof fetch;
+  createPaymentMethod?: () => Promise<PaymentMethodResult>;
 }
 
 enum FormErrorCodeEnum {
@@ -14,7 +17,9 @@ enum FormErrorCodeEnum {
   FORM_NOT_FOUND = 'FORM_NOT_FOUND',
   NO_FILE_UPLOADS = 'NO_FILE_UPLOADS',
   TOO_MANY_FILES = 'TOO_MANY_FILES',
-  FILES_TOO_BIG = 'FILES_TOO_BIG'
+  FILES_TOO_BIG = 'FILES_TOO_BIG',
+  STRIPE_CLIENT_ERROR = 'STRIPE_CLIENT_ERROR',
+  STRIPE_SCA_ERROR = 'STRIPE_SCA_ERROR'
 }
 
 enum FieldErrorCodeEnum {
@@ -32,6 +37,9 @@ export interface FormError {
   field?: string;
   code?: FormErrorCode | FieldErrorCode;
   message: string;
+  details?: {
+    stripeCode?: string;
+  };
 }
 
 export interface FieldError extends FormError {
@@ -76,5 +84,5 @@ export function hasErrors(body: SubmissionBody): body is ErrorBody {
 
 export interface SubmissionResponse {
   body: SubmissionBody;
-  response: Response;
+  response: Response | null;
 }

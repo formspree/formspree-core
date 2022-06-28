@@ -1,24 +1,28 @@
-import Promise from 'promise-polyfill';
+import PromisePolyfill from 'promise-polyfill';
 import fetchPonyfill from 'fetch-ponyfill';
+import { Stripe } from '@stripe/stripe-js';
 import {
   SubmissionData,
   SubmissionOptions,
   SubmissionBody,
   SubmissionResponse
 } from './forms';
-import { clientHeader, encode64 } from './utils';
+import { appendExtraData, clientHeader, encode64, handleSCA } from './utils';
 import { Session } from './session';
 
 export interface Config {
   project?: string;
+  stripePromise?: Stripe;
 }
 
 export class Client {
   project: string | undefined;
+  stripePromise: Stripe | undefined;
   private session: Session | undefined;
 
   constructor(config: Config = {}) {
     this.project = config.project;
+    this.stripePromise = config.stripePromise;
     if (typeof window !== 'undefined') this.startBrowserSession();
   }
 
@@ -45,13 +49,14 @@ export class Client {
    * @param data - An object or FormData instance containing submission data.
    * @param args - An object of form submission data.
    */
-  submitForm(
+  async submitForm(
     formKey: string,
     data: SubmissionData,
     opts: SubmissionOptions = {}
   ): Promise<SubmissionResponse> {
     let endpoint = opts.endpoint || 'https://formspree.io';
-    let fetchImpl = opts.fetchImpl || fetchPonyfill({ Promise }).fetch;
+    let fetchImpl =
+      opts.fetchImpl || fetchPonyfill({ Promise: PromisePolyfill }).fetch;
     let url = this.project
       ? `${endpoint}/p/${this.project}/f/${formKey}`
       : `${endpoint}/f/${formKey}`;
@@ -81,22 +86,76 @@ export class Client {
       headers
     };
 
-    return fetchImpl(url, request).then(response => {
-      return response.json().then(
-        (body: SubmissionBody): SubmissionResponse => {
-          return { body, response };
-        }
-      );
-    });
+    // first check if we need to add the stripe paymentMethod
+    if (this.stripePromise && opts.createPaymentMethod) {
+      // Get Stripe payload
+      const payload = await opts.createPaymentMethod();
+
+      if (payload.error) {
+        // Return the error in case Stripe failed to create a payment method
+        return {
+          response: null,
+          body: {
+            errors: [
+              {
+                code: 'STRIPE_CLIENT_ERROR',
+                message: 'Error creating payment method',
+                field: 'paymentMethod'
+              }
+            ]
+          }
+        };
+      }
+
+      // Add the paymentMethod to the data
+      appendExtraData(data, 'paymentMethod', payload.paymentMethod.id);
+
+      // Send a request to Formspree server to handle the payment method
+      const response = await fetchImpl(url, {
+        ...request,
+        body: data
+      });
+      const responseData = await response.json();
+
+      // Handle SCA
+      if (
+        responseData &&
+        responseData.stripe &&
+        responseData.stripe.requiresAction &&
+        responseData.resubmitKey
+      ) {
+        return await handleSCA({
+          stripePromise: this.stripePromise,
+          responseData,
+          response,
+          payload,
+          data,
+          fetchImpl,
+          request,
+          url
+        });
+      }
+
+      return {
+        response,
+        body: responseData
+      };
+    } else {
+      return fetchImpl(url, request).then(response => {
+        return response.json().then(
+          (body: SubmissionBody): SubmissionResponse => {
+            return { body, response };
+          }
+        );
+      });
+    }
   }
 }
 
 /**
  * Constructs the client object.
  */
-export const createClient = (config?: Config): Client => {
-  return new Client(config);
-};
+export const createClient = (config?: Config): Client => new Client(config);
 
 /**
  * Fetches the global default client.
